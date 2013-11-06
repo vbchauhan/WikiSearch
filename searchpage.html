@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="shortcut icon" href="../assets/ico/favicon.png">
+<script type="text/javascript" src="js/jquery-2.0.3.js"></script>
+<script src="dist/js/bootstrap.min.js"></script>
+<title>Search box</title>
+
+<!-- Bootstrap core CSS -->
+<link href="dist/css/bootstrap.css" rel="stylesheet">
+
+<!-- Custom styles for this template -->
+<link href="starter-template.css" rel="stylesheet">
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+      <script src="assets/js/html5shiv.js"></script>
+      <script src="assets/js/respond.min.js"></script>
+    <![endif]-->
+<!-- CSS styles for standard search box -->
+<script type="text/javascript" charset="utf-8">
+  // This function is called when the page is loaded
+  $(document).ready(function(){
+	  // Required div tags are hidden at the load of the page
+	  $("#searchresult").hide();
+	  $("#searchbox").show();
+	  // Detect Enter key
+	  $('#search').keydown(function (e){
+		    if(e.keyCode == 13){
+		    	e.preventDefault();
+		    	getResult(1);
+		    	return false;
+		        
+		    }
+		    
+		});
+
+});
+  // hide and show the required div tags to get the back funtionality working
+  function goBack(){
+	  $("#searchresult").hide();
+	  $("#searchtable").show();
+	  $("#searchbox").show();
+	  $("#searchboximplementation").show();
+	  $("#searchagain").val(" ");
+	  $("#search").val(" ");
+	  
+  };
+  // Detect the Enter key pressed 
+  function searchKeyPress(e){
+		if(window.event){
+			e = window.event; 
+		}
+		if(e.keyCode == 13){
+			getResult(2);
+		}
+	}	
+  //This function is called on press of enter or click of search button
+  function getResult(value){
+	  //hide and show the necessary div tags
+	  $("#searchresult").show();
+	  $("#searchtable").hide();
+	  $("#searchbox").hide();
+	  $("#searchboximplementation").hide();
+	  // get the value to be searched
+	  var searchelement;
+	  if (value == 1)
+		   searchelement = $("#search").val();
+	  else
+		  searchelement = $("#searchagain").val();
+	  var url;
+	  //alert(searchelement);
+	  if(searchelement)
+		  {
+	// fetch the data from the wiki api	  
+		  $("#resulttable").html("");
+	  url = 'http://en.wikipedia.org/w/api.php?format=json&action=query&list=search&srsearch='+searchelement+'&srprop=timestamp';
+	  console.log(url);
+	  // ajax call to get the json object of the results
+	  $.ajax({
+	        url: url,
+	        type: 'POST',
+	        dataType: 'jsonp',
+			success :function(result) {
+			data = result.query.search;	
+	        console.log(data);
+	        var tablerow = '<tr>' +'<th>NS</th>' +'<th>Title</th>' +'<th>TimeStamp</th>' +'</tr>';
+	        $("#resulttable").html(tablerow);
+	        $("#resulttable").css({"width":"60%"});
+	        for(var i = 0;i<data.length;i++){
+	        $("#resulttable").append('<tr><td>'+data[i].ns+'</td><td><a href="http://en.wikipedia.org/wiki/'+data[i].title+'">'+data[i].title+'</td><td>'+data[i].timestamp+'</td></tr>');
+	        }
+			},
+	        error : function(err) {
+	        	$("#resulttable").html("No data found or some error fetching data from Wiki API");
+		      },
+	      })
+
+		  }
+	  else{
+		// code executed if no parameter entered
+		  $("#searchresult").hide();
+		  $("#searchtable").show();
+		  $("#searchbox").show();
+		  $("#searchboximplementation").show();
+		  alert("Please enter a search parameter in the search box");
+		  
+	  }	
+	  
+	    return false;
+  }
+  </script>
+
+</head>
+
+<body>
+
+	<div class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle" data-toggle="collapse"
+					data-target=".navbar-collapse">
+					<span class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#">Search Box</a>
+			</div>
+			<div class="collapse navbar-collapse">
+				<ul class="nav navbar-nav">
+					<li class="active"><a href="searchpage.html">Home</a></li>
+					<li><a href="#about">About</a></li>
+					<li><a href="#contact">Contact</a></li>
+				</ul>
+				<button type="button" class="btn btn-primary"
+					style="float: right; margin-top: 0.6%">Sign In</button>
+			</div>
+			<!--/.nav-collapse -->
+		</div>
+	</div>
+	<div id="searchresult" style="float: right; width: 95%; top: 5%">
+		<br>
+		<!--  <form id="formsearchresult" method="post">-->
+		<input type="text" name="searchagain" id="searchagain" size="67"
+			onkeypress="searchKeyPress(event);" maxlength="120"><input
+			type="button" OnClick="getResult(2)" value="Search">
+		<!-- </form>-->
+		<br>
+		<h1>Results</h1>
+		<input type="button" OnClick="goBack()" value="Back">
+		<table id="resulttable"
+			class="table table-striped table-hover table-bordered">
+		</table>
+	</div>
+	<div id="searchtable"></div>
+	<div class="container">
+
+		<div id="searchboximplementation" class="starter-template">
+			<h1>Search Box Implementation</h1>
+			<img src="wikiimg.jpg">
+		</div>
+
+	</div>
+	<!-- /.container -->
+	<div id="searchbox" style="float: right; width: 67%">
+		<!--   <form id="formsearch" method="post"> -->
+		<input type="text" name="search" id="search" size="60"
+			onkeypress="searchKeyPress(event);" maxlength="120"><input
+			type="button" OnClick="getResult(1)" value="Search">
+		<!--  	 </form>-->
+	</div>
+
+	<div class="navbar navbar-inverse navbar-fixed-bottom">
+		<div class="container">
+			<div class="navbar-footer">
+				<h5 style="color: white">Copyright. The image for wiki search
+					is taken from
+					http://wordpress.org/plugins/wikipedia-search-and-display-widget.
+					This is used only for testing purpose.</h5>
+			</div>
+
+		</div>
+	</div>
+
+</body>
+</html>
